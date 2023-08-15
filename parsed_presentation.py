@@ -16,17 +16,6 @@ class PresentationParser:
         self._presentation_subjects = {}
         self._parse_presentation(path)
 
-    def __str__(self):
-        """
-
-        :return:
-        """
-        text = ''
-        for item in self._presentation_subjects.items():
-            text += str(item) + '\n'
-
-        return text
-
     def _parse_presentation(self, path: str):
         """
         Parse the presentation. Extract the text from each slide and save it by subject.
@@ -69,7 +58,7 @@ class PresentationParser:
             yield self._presentation_subjects[subject]
 
 
-def clean_weird_whitespaces(text: str):
+def clean_weird_whitespaces(text: str) -> str:
     """
     Clean weird whitespaces likewise two spaces, tabs est.
     :param text: Text to clean
@@ -80,10 +69,3 @@ def clean_weird_whitespaces(text: str):
     text = re.sub('  +', ' ', text)
     text = re.sub('\t\t+', '\t', text)
     return text
-
-
-p = PresentationParser(r'C:\Users\josh5\Downloads\git.pptx')
-print(p)
-f = p.get_section()
-for i in f:
-    print(i)
