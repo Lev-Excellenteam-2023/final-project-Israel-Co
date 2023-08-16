@@ -1,5 +1,6 @@
 from pptx import Presentation
 import re
+from typing import List, Tuple
 
 
 class PresentationParser:
@@ -48,14 +49,15 @@ class PresentationParser:
 
         return clean_weird_whitespaces(slide_text)
 
-    def get_section(self):
+    def get_section(self) -> Tuple[str, List[Tuple[int, str]]]:
         """
         Generator which returns list of tuples. Each tuple contains slide number and the text slide.
         e.g. [(1, '1st slide text), (2, 2nd slide text)]
-        :return: Generator
+        :return: Generator that gives tuple of subject and list of tuples.
+        Each tuple contains slide number and the text slide.
         """
         for subject in self._presentation_subjects:
-            yield self._presentation_subjects[subject]
+            yield subject, self._presentation_subjects[subject]
 
 
 def clean_weird_whitespaces(text: str) -> str:
@@ -69,3 +71,11 @@ def clean_weird_whitespaces(text: str) -> str:
     text = re.sub('  +', ' ', text)
     text = re.sub('\t\t+', '\t', text)
     return text
+
+
+# if __name__ == '__main__':
+#     prs = PresentationParser(r'C:\Users\josh5\Downloads\ogging, debugging, getting into a large codebase.pptx')
+#     for section, slides in prs.get_section():
+#         print(section)
+#         for slide in slides:
+#             print(f'\t{slide[0]}: {slide[1]}')
