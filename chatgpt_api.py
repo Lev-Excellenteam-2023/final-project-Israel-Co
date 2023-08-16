@@ -3,45 +3,52 @@ from typing import List, Tuple, Dict
 import openai
 import parsed_presentation
 
-API_KEY = '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'
+API_KEY = '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'
 
 
 # function to generate text to be used in the chatbot
-def generate_response(title: str, presentation_subject: List[Tuple[int, str]]) -> Dict[int, str]:
-    headline = 'Can you explain me this presentation?\n'
-
+def generate_explain_to_slide(slide_text: str) -> str:
+    """
+    Generate explain from chatGPT
+    :param slide_text: Text of the slide
+    :return: Explain from chatGPT for slide's text
+    """
     openai.api_key = API_KEY
 
-    slides_dict = {}
+    if len(slide_text.split()) < 10:
+        return slide_text
+    else:
+        messages = [{'role': 'system', 'content': 'You are a great powerpoint lecture explainer!'},
+                    {'role': 'user', 'content': slide_text}]
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages
+        )
+        return response.choices[0].message.content
 
-    for slide_number, slide_text in presentation_subject:
-        if slide_text == title + '\n':
-            response = slide_text
-        else:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[{'role': 'user', 'content': headline + slide_text}]
-            )
-            # response = openai.Completion.create(
-            #     engine="davinci",
-            #     prompt=headline + slide_text
-            # )
-            headline = ''
-            response = response.choices[0].message.content
 
-        slides_dict[slide_number] = response
+def presentation_explainer(presentation: parsed_presentation.PresentationParser) -> List[str]:
+    """
+    Generate explain for each slide in the presentation
+    :param presentation: Presentation to explain
+    :return: List of explains for each slide in the presentation
+    """
+    explain_list = [''] * presentation.get_num_of_slides()
 
-    return slides_dict
+    for slide_num, slide_text in presentation.get_slide():
+        exp = generate_explain_to_slide(slide_text)
+        explain_list[slide_num] = exp
+
+    return explain_list
 
 
 def main():
     prs = parsed_presentation.PresentationParser(
+        # r'C:\Users\josh5\Downloads\asyncio-intro (1).pptx')
         r'C:\Users\josh5\Downloads\ogging, debugging, getting into a large codebase.pptx')
-    for subject, slides in prs.get_section():
-        exp = generate_response(subject, slides)
-        for k in exp:
-            print(exp[k])
-        print('=' * 100)
+    list_explained = presentation_explainer(prs)
+    for slide_num in range(len(list_explained)):
+        print(f'{slide_num}:', list_explained[slide_num])
 
 
 if __name__ == '__main__':
