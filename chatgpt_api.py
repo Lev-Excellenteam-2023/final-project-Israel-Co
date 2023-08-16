@@ -3,7 +3,7 @@ from typing import List, Tuple, Dict
 import openai
 import parsed_presentation
 
-API_KEY = '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'
+API_KEY = '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'
 
 
 # function to generate text to be used in the chatbot
@@ -33,23 +33,23 @@ def presentation_explainer(presentation: parsed_presentation.PresentationParser)
     :param presentation: Presentation to explain
     :return: List of explains for each slide in the presentation
     """
-    explain_list = [''] * presentation.get_num_of_slides()
+    explains_list = [''] * presentation.get_num_of_slides()
 
     for slide_num, slide_text in presentation.get_slide():
-        exp = generate_explain_to_slide(slide_text)
-        explain_list[slide_num] = exp
+        explain = generate_explain_to_slide(slide_text)
+        explains_list[slide_num] = explain
 
-    return explain_list
-
-
-def main():
-    prs = parsed_presentation.PresentationParser(
-        # r'C:\Users\josh5\Downloads\asyncio-intro (1).pptx')
-        r'C:\Users\josh5\Downloads\ogging, debugging, getting into a large codebase.pptx')
-    list_explained = presentation_explainer(prs)
-    for slide_num in range(len(list_explained)):
-        print(f'{slide_num}:', list_explained[slide_num])
+    return explains_list
 
 
-if __name__ == '__main__':
-    main()
+# def main():
+#     prs = parsed_presentation.PresentationParser(
+#         # r'C:\Users\josh5\Downloads\asyncio-intro (1).pptx')
+#         r'C:\Users\josh5\Downloads\ogging, debugging, getting into a large codebase.pptx')
+#     list_explained = presentation_explainer(prs)
+#     for slide_num in range(len(list_explained)):
+#         print(f'{slide_num}:', list_explained[slide_num])
+#
+#
+# if __name__ == '__main__':
+#     main()
