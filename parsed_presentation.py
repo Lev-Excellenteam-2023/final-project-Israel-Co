@@ -63,8 +63,3 @@ def clean_weird_whitespaces(text: str) -> str:
     text = re.sub('  +', ' ', text)
     text = re.sub('\t\t+', '\t', text)
     return text
-
-# if __name__ == '__main__':
-#     prs = PresentationParser(r'C:\Users\josh5\Downloads\ogging, debugging, getting into a large codebase.pptx')
-#     for slide_number, slide_text in prs.get_slide():
-#         print(f'\t{slide_number}: {slide_text}')

@@ -7,17 +7,17 @@ import openAI_key
 import parsed_presentation
 
 
-async def generate_explain_for_slide(slide_number: int, slide_text: str) -> Tuple[int, str]:
+async def generate_explain_for_slide(slide_text: str, secret_key: openai.api_key) -> Tuple[int, str]:
     """
     Generate explain from chatGPT
-    :param slide_number: Number of the slide
+    :param secret_key: Secret key for openAI
     :param slide_text: Text of the slide
     :return: Explain from chatGPT for slide's text
     """
-    openai.api_key = openAI_key.API_KEY
+    openai.api_key = secret_key
 
     if len(slide_text.split()) < 10:
-        return slide_number, slide_text
+        return slide_text
     else:
         messages = [{'role': 'system',
                      'content': 'You are a great powerpoint explainer! and you have to explain the slide in about 100 words'},
@@ -26,8 +26,7 @@ async def generate_explain_for_slide(slide_number: int, slide_text: str) -> Tupl
             model="gpt-3.5-turbo",
             messages=messages
         )
-
-        return slide_number, response.choices[0].message.content
+        return response.choices[0].message.content
 
 
 async def presentation_explainer(presentation: parsed_presentation.PresentationParser) -> List[str]:
@@ -36,24 +35,8 @@ async def presentation_explainer(presentation: parsed_presentation.PresentationP
     :param presentation: Presentation to explain
     :return: List of explains for each slide in the presentation
     """
-    explains_list = [''] * presentation.get_num_of_slides()
-
     explains = await asyncio.gather(
-        *(generate_explain_for_slide(slide_num, slide_text) for slide_num, slide_text in presentation.get_slide()))
+        *(generate_explain_for_slide(slide_text, openAI_key.API_KEY) for slide_num, slide_text in
+          presentation.get_slide()))
 
-    for index, explain in explains:
-        explains_list[index] = explain
-
-    return explains_list
-
-# def main():
-#     prs = parsed_presentation.PresentationParser(
-#         # r'C:\Users\josh5\Downloads\asyncio-intro (1).pptx')
-#         r'C:\Users\josh5\Downloads\ogging, debugging, getting into a large codebase.pptx')
-#     list_explained = presentation_explainer(prs)
-#     for slide_num in range(len(list_explained)):
-#         print(f'{slide_num}:', list_explained[slide_num])
-#
-#
-# if __name__ == '__main__':
-#     main()
+    return explains
