@@ -1,33 +1,36 @@
+import asyncio
 from typing import List, Tuple, Dict
 
 import openai
+
+import openAI_key
 import parsed_presentation
 
-API_KEY = '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'
 
-
-# function to generate text to be used in the chatbot
-def generate_explain_to_slide(slide_text: str) -> str:
+async def generate_explain_for_slide(slide_number: int, slide_text: str) -> Tuple[int, str]:
     """
     Generate explain from chatGPT
+    :param slide_number: Number of the slide
     :param slide_text: Text of the slide
     :return: Explain from chatGPT for slide's text
     """
-    openai.api_key = API_KEY
+    openai.api_key = openAI_key.API_KEY
 
     if len(slide_text.split()) < 10:
-        return slide_text
+        return slide_number, slide_text
     else:
-        messages = [{'role': 'system', 'content': 'You are a great powerpoint lecture explainer!'},
+        messages = [{'role': 'system',
+                     'content': 'You are a great powerpoint explainer! and you have to explain the slide in about 100 words'},
                     {'role': 'user', 'content': slide_text}]
-        response = openai.ChatCompletion.create(
+        response = await openai.ChatCompletion.acreate(
             model="gpt-3.5-turbo",
             messages=messages
         )
-        return response.choices[0].message.content
+
+        return slide_number, response.choices[0].message.content
 
 
-def presentation_explainer(presentation: parsed_presentation.PresentationParser) -> List[str]:
+async def presentation_explainer(presentation: parsed_presentation.PresentationParser) -> List[str]:
     """
     Generate explain for each slide in the presentation
     :param presentation: Presentation to explain
@@ -35,12 +38,13 @@ def presentation_explainer(presentation: parsed_presentation.PresentationParser)
     """
     explains_list = [''] * presentation.get_num_of_slides()
 
-    for slide_num, slide_text in presentation.get_slide():
-        explain = generate_explain_to_slide(slide_text)
-        explains_list[slide_num] = explain
+    explains = await asyncio.gather(
+        *(generate_explain_for_slide(slide_num, slide_text) for slide_num, slide_text in presentation.get_slide()))
+
+    for index, explain in explains:
+        explains_list[index] = explain
 
     return explains_list
-
 
 # def main():
 #     prs = parsed_presentation.PresentationParser(
