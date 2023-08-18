@@ -1,20 +1,17 @@
+import os
 import asyncio
 from typing import List, Tuple, Dict
-
 import openai
-
-import openAI_key
 import parsed_presentation
 
 
-async def generate_explain_for_slide(slide_text: str, secret_key: openai.api_key) -> Tuple[int, str]:
+async def generate_explain_for_slide(slide_text: str) -> str:
     """
     Generate explain from chatGPT
-    :param secret_key: Secret key for openAI
     :param slide_text: Text of the slide
     :return: Explain from chatGPT for slide's text
     """
-    openai.api_key = secret_key
+    openai.api_key = os.environ.get('OPENAI_API_KEY')
 
     if len(slide_text.split()) < 10:
         return slide_text
@@ -36,7 +33,6 @@ async def presentation_explainer(presentation: parsed_presentation.PresentationP
     :return: List of explains for each slide in the presentation
     """
     explains = await asyncio.gather(
-        *(generate_explain_for_slide(slide_text, openAI_key.API_KEY) for slide_num, slide_text in
-          presentation.get_slide()))
+        *(generate_explain_for_slide(slide_text) for slide_num, slide_text in presentation.get_slide()))
 
     return explains
